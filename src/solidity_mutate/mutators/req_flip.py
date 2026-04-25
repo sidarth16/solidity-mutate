@@ -4,12 +4,26 @@ import shutil
 from .common import Colors, color
 
 
-def mutate_as_flip(ctx):
+_COMPARE_RE = re.compile(r"(>=|<=|==|!=|>|<)")
+_STRING_RE = re.compile(r'"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'')
+
+
+def _operator_matches_outside_strings(line):
+    string_ranges = [match.span() for match in _STRING_RE.finditer(line)]
+
+    for match in _COMPARE_RE.finditer(line):
+        start, end = match.span()
+        if any(start >= s and end <= e for s, e in string_ranges):
+            continue
+        yield match
+
+
+def mutate_req_flip(ctx):
     with open(ctx.target_file) as f:
         lines = f.read().split("\n")
 
     total = compiled = caught = timeouts = 0
-    name = "AS-FLIP"
+    name = "REQ-FLIP"
     flips = {
         "==": "!=",
         "!=": "==",
@@ -20,13 +34,13 @@ def mutate_as_flip(ctx):
     }
 
     if ctx.should_print_sections():
-        print(color("\n--- AS-FLIP (Assert Condition Flip) ---", Colors.CYAN))
+        print(color("\n--- REQ-FLIP (Require/Assert Condition Flip) ---", Colors.CYAN))
 
     for i, line in enumerate(lines):
         if ("require" not in line) and ("assert" not in line):
             continue
 
-        for m in re.finditer(r"(>=|<=|==|!=|>|<)", line):
+        for m in _operator_matches_outside_strings(line):
             total += 1
             start, end = m.span()
             op = m.group()

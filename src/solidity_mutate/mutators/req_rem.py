@@ -3,15 +3,15 @@ import shutil
 from .common import Colors, color
 
 
-def mutate_as_rem(ctx):
+def mutate_req_rem(ctx):
     with open(ctx.target_file) as f:
         lines = f.read().split("\n")
 
     total = compiled = caught = timeouts = 0
-    name = "AS-RM"
+    name = "REQ-RM"
 
     if ctx.should_print_sections():
-        print(color("\n--- AS-REM (Assert Removal) ---", Colors.CYAN))
+        print(color("\n--- REQ-REM (Require/Assert Removal) ---", Colors.CYAN))
 
     for i, line in enumerate(lines):
         if ("require" not in line) and ("assert" not in line):
