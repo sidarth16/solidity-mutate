@@ -61,7 +61,7 @@ def mutate_req_flip(ctx):
                 print(ctx.render_mutant_line(name, i + 1, line.strip(), mutated[i].strip(), status, timed_out))
 
             if "Uncaught" in status:
-                ctx.uncaught_by_category["ASSERT / VALIDATION"] += 1
+                ctx.uncaught_by_category["Require/Assert VALIDATION"] += 1
 
             shutil.copy(ctx.backup_file, ctx.target_file)
 
