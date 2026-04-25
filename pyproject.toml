@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [
-  {name = "OpenAI"},
+  {name = "Sidarth S"},
 ]
 keywords = ["solidity", "mutation-testing", "foundry", "smart-contracts"]
 classifiers = [
