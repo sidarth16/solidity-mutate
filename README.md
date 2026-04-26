@@ -2,20 +2,20 @@
 
 Mutation testing framework for Solidity contracts.
 
-Version: `v0.1.0`
+Version: `v0.1.1`
 
 ## Install
 
 If you are using the published package from PyPI:
 
 ```bash
-pip install solidity-mutate==0.1.0
+pip install solidity-mutate==0.1.1
 ```
 
 If you want to work on the repository locally:
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/sidarth16/solidity-mutate.git
 cd solidity-mutate
 pip install -e .
 ```
@@ -79,3 +79,27 @@ Run the bundled Foundry example directly:
 cd examples/test_contract
 forge test
 ```
+
+## Sample Results
+
+The bundled example project currently reaches:
+
+- `100%` line coverage
+- `100%` statement coverage
+- `55.56%` mutation score
+
+### Coverage Report
+
+![Coverage report](https://raw.githubusercontent.com/sidarth16/solidity-mutate/main/assets/coverage.png)
+
+### Mutation Report
+
+![Mutation report](https://raw.githubusercontent.com/sidarth16/solidity-mutate/main/assets/report.png)
+
+### `-vv` Sample Output
+
+![Verbose mutation output](https://raw.githubusercontent.com/sidarth16/solidity-mutate/main/assets/vv.png)
+
+### Full Output
+
+![Full mutation output](https://raw.githubusercontent.com/sidarth16/solidity-mutate/main/assets/output.png)
