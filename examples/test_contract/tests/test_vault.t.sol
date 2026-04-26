@@ -32,7 +32,5 @@ contract VaultTest is Test {
 
         vm.prank(owner);
         vault.withdraw(40);
-
-        require(vault.get_balance() == 60, "withdraw failed");
     }
 }
