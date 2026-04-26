@@ -25,6 +25,81 @@ def color(text, c):
 
 
 @dataclass
+class SourceScan:
+    masked_lines: list[str]
+    comment_starts: list[int | None]
+
+
+def scan_source(lines: list[str]) -> SourceScan:
+    masked_lines: list[str] = []
+    comment_starts: list[int | None] = []
+    in_block_comment = False
+    in_string: str | None = None
+    escape = False
+
+    for line in lines:
+        masked: list[str] = []
+        comment_start: int | None = None
+        i = 0
+
+        while i < len(line):
+            ch = line[i]
+            nxt = line[i + 1] if i + 1 < len(line) else ""
+
+            if in_block_comment:
+                if comment_start is None:
+                    comment_start = i
+                masked.append(" ")
+                if ch == "*" and nxt == "/":
+                    masked.append(" ")
+                    i += 2
+                    in_block_comment = False
+                    continue
+                i += 1
+                continue
+
+            if in_string is not None:
+                masked.append(" ")
+                if escape:
+                    escape = False
+                elif ch == "\\":
+                    escape = True
+                elif ch == in_string:
+                    in_string = None
+                i += 1
+                continue
+
+            if ch == "/" and nxt == "/":
+                if comment_start is None:
+                    comment_start = i
+                masked.extend(" " for _ in line[i:])
+                break
+
+            if ch == "/" and nxt == "*":
+                if comment_start is None:
+                    comment_start = i
+                masked.append(" ")
+                masked.append(" ")
+                in_block_comment = True
+                i += 2
+                continue
+
+            if ch in ('"', "'"):
+                in_string = ch
+                masked.append(" ")
+                i += 1
+                continue
+
+            masked.append(ch)
+            i += 1
+
+        masked_lines.append("".join(masked))
+        comment_starts.append(comment_start)
+
+    return SourceScan(masked_lines=masked_lines, comment_starts=comment_starts)
+
+
+@dataclass
 class MutationContext:
     project_root: Path
     source_root: Path
@@ -129,7 +204,8 @@ class MutationContext:
 
         compiled += 1
 
-        if "[FAIL" in output:
+        lowered = output.lower()
+        if "fail:" in lowered or "suite result: failed" in lowered:
             caught += 1
             return color("✔ Caught", Colors.GREEN), compiled, caught
 

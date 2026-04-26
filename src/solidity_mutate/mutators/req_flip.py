@@ -1,7 +1,7 @@
 import re
 import shutil
 
-from .common import Colors, color
+from .common import Colors, color, scan_source
 
 
 _COMPARE_RE = re.compile(r"(>=|<=|==|!=|>|<)")
@@ -21,6 +21,7 @@ def _operator_matches_outside_strings(line):
 def mutate_req_flip(ctx):
     with open(ctx.target_file) as f:
         lines = f.read().split("\n")
+    scan = scan_source(lines)
 
     total = compiled = caught = timeouts = 0
     name = "REQ-FLIP"
@@ -37,10 +38,11 @@ def mutate_req_flip(ctx):
         print(color("\n--- REQ-FLIP (Require/Assert Condition Flip) ---", Colors.CYAN))
 
     for i, line in enumerate(lines):
-        if ("require" not in line) and ("assert" not in line):
+        code_line = scan.masked_lines[i]
+        if ("require" not in code_line) and ("assert" not in code_line):
             continue
 
-        for m in _operator_matches_outside_strings(line):
+        for m in _operator_matches_outside_strings(code_line):
             total += 1
             start, end = m.span()
             op = m.group()

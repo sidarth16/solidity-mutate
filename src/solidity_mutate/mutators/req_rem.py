@@ -1,11 +1,12 @@
 import shutil
 
-from .common import Colors, color
+from .common import Colors, color, scan_source
 
 
 def mutate_req_rem(ctx):
     with open(ctx.target_file) as f:
         lines = f.read().split("\n")
+    scan = scan_source(lines)
 
     total = compiled = caught = timeouts = 0
     name = "REQ-RM"
@@ -14,12 +15,17 @@ def mutate_req_rem(ctx):
         print(color("\n--- REQ-REM (Require/Assert Removal) ---", Colors.CYAN))
 
     for i, line in enumerate(lines):
-        if ("require" not in line) and ("assert" not in line):
+        code_line = scan.masked_lines[i]
+        if ("require" not in code_line) and ("assert" not in code_line):
             continue
 
         total += 1
         mutated = lines.copy()
-        mutated[i] = "uint256 _ = 0;"
+        comment_start = scan.comment_starts[i]
+        if comment_start is None:
+            mutated[i] = "uint256 _ = 0;"
+        else:
+            mutated[i] = "uint256 _ = 0;" + line[comment_start:]
 
         with open(ctx.target_file, "w") as f:
             f.write("\n".join(mutated))
